@@ -81,6 +81,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="helper\ServiceNameHelperTest.cs" />
     <Compile Include="MongodbTestBase.cs" />
     <Compile Include="datacontracts\UserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

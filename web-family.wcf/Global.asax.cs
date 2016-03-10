@@ -5,7 +5,8 @@ using System.Web.Routing;
 using System.ServiceModel.Activation;
 using Ninject.Extensions.Wcf;
 using web_family.wcf.servicecontracts;
-using System;
+using web_family.core.helper;
+using System.Linq;
 
 namespace web_family.wcf
 {
@@ -26,10 +27,15 @@ namespace web_family.wcf
 
         private void RegisterRoutes()
         {
-            
-            RouteTable.Routes.Add(new ServiceRoute("upgradeservice", 
-                                    new NinjectServiceHostFactory(), 
-                                    typeof(UpgradeService)));
+            foreach (var type in typeof(UpgradeService).Assembly.GetTypes())
+            {
+                foreach (var serviceInterface in type.GetInterfaces().Where(x => x.IsServiceContract()))
+                {
+                    RouteTable.Routes.Add(new ServiceRoute(serviceInterface.GetServiceName(),
+                        new NinjectServiceHostFactory(),
+                        type));
+                }
+            }
         }
     }
 }

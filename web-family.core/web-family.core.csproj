@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="client\ServiceClientModule.cs" />
     <Compile Include="datacontracts\User.cs" />
+    <Compile Include="helper\ServiceNameHelper.cs" />
     <Compile Include="IUpgradeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

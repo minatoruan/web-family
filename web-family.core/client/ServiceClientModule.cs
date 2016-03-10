@@ -1,11 +1,9 @@
 ﻿using Ninject.Modules;
-using Ninject.Planning.Bindings;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
-using System.Xml;
+using System.ServiceModel.Channels;
+using web_family.core.helper;
 
 namespace web_family.core.client
 {
@@ -68,36 +66,30 @@ namespace web_family.core.client
         {
             foreach (var type in this.GetType().Assembly.GetTypes())
             {
-                if (type.Namespace.Equals("web_family.core") &&
-                    type.GetCustomAttributes(typeof(ServiceContractAttribute), true).Any())
+                if (type.IsServiceContract())
                 {
-                    var attribute = type.GetCustomAttributes(typeof(ServiceContractAttribute), true)
-                                        .Cast<ServiceContractAttribute>().FirstOrDefault();
-                    yield return new Tuple<string, Type>(attribute.Name, type);
+                    yield return new Tuple<string, Type>(type.GetServiceName(), type);
                 }
             }
         }
 
         public override void Load()
         {
-            /*
-            foreach(var bindingdata in GetTypesWithServiceContract())
+            foreach (var bindingdata in GetTypesWithServiceContract())
             {
                 Kernel.Bind(bindingdata.Item2)
                     .ToMethod(m =>
                     {
-                        var serivcename = bindingdata.Item1;
+                        var servicename = bindingdata.Item1;
                         var type = bindingdata.Item2;
-                        var endpoint = GetCurrentUriService(serivcename);
-                        return Activator.CreateInstance(type, new BasicHttpBinding(), endpoint);
+                        var endpoint = GetCurrentUriService(servicename);
+                        var generictype = typeof(ChannelFactory<>).MakeGenericType(type);
+                        var constructor = generictype.GetConstructor(new Type[] { typeof(Binding), typeof(EndpointAddress) });
+                        var obj = constructor.Invoke(new object[] { new BasicHttpBinding(), endpoint });
+                        var methodInfo = obj.GetType().GetMethod("CreateChannel", new Type[] { });
+                        return methodInfo.Invoke(obj, new object[] { });
                     }).InSingletonScope();
-            }*/
-
-            Kernel.Bind<IUpgradeService>().ToMethod<IUpgradeService>(x =>
-            {
-                var endpoint = GetCurrentUriService("UpgradeService");
-                return ChannelFactory<IUpgradeService>.CreateChannel(new BasicHttpBinding(), endpoint);
-            });
+            }
         }
     }
 }
