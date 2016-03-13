@@ -12,10 +12,9 @@ namespace web_family.wcf.upgrades
             this._userRepository = userRepository;
         }
 
-        public async void Upgrade()
+        public void Upgrade()
         {
-            var exist = await _userRepository.ExistsAsyn("superuser");
-            if (exist) return;
+            if (_userRepository.ExistsAsyn("superuser").Result) return;
 
             var admin = new User
             {
